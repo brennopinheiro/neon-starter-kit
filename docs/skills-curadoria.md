@@ -199,9 +199,22 @@ Melhor seleção disponível:
 
 ## OBSERVABILIDADE
 
-### Sentry — Lacuna ⚠️
+### Sentry — OFICIAL ✅
 
-Nenhuma skill oficial ou community relevante encontrada para Sentry. Criar nossa própria ao longo do boilerplate.
+**Fonte:** `sentry/dev` — publicada pelo próprio time do Sentry — **14.5K installs**
+
+| Skill | Install | Installs | Cobre |
+|---|---|---|---|
+| `sentry-cli` | `npx skills add https://cli.sentry.dev -g -y` | 14.5K | Auth, projetos, issues (com IA via Seer: `sentry issue explain` / `sentry issue plan`), releases, traces, spans, logs, API direto, output JSON para scripting |
+
+**Skills community complementares:**
+
+| Skill | Install | Installs | Cobre |
+|---|---|---|---|
+| `sentry-skill` | `npx skills add julianobarbosa/claude-code-skills@sentry-skill -g -y` | 37 | Setup e integração Sentry |
+| `sentry-observability` | `npx skills add jeremylongshore/claude-code-plugins-plus-skills@sentry-observability -g -y` | 27 | Observabilidade com Sentry |
+| `observability` | `npx skills add phrazzld/claude-config@observability -g -y` | 23 | Observabilidade geral |
+| `fix-observability` | `npx skills add phrazzld/claude-config@fix-observability -g -y` | 23 | Debug de problemas de observabilidade |
 
 ---
 
@@ -227,7 +240,7 @@ Não precisam instalar — disponíveis via slash command:
 | Tecnologia | Lacuna | Plano |
 |---|---|---|
 | **Cloudflare Zaraz** | Coberto parcialmente pelo `cloudflare/skills`. Sem skill dedicada. | Criar `zaraz` skill com: config via dashboard, Zaraz Web API (`window.zaraz.track`, `zaraz.set`), setup PostHog via Zaraz |
-| **Sentry** | Zero skills disponíveis | Criar `sentry-nextjs` skill: `sentry.server.config.ts`, `sentry.client.config.ts`, source maps, alertas |
+| **Sentry** | Skill oficial existe (`sentry/dev` — 14.5K installs) | Nenhuma lacuna |
 | **pnpm workspaces** | Coberto parcialmente pelo Turborepo skill | Documentar no CLAUDE.md do boilerplate |
 | **React Email + Resend (integrado)** | Skills separadas existem, integração não | Criar `resend-react-email` skill combinando os dois |
 
@@ -268,7 +281,10 @@ npx skills add null-shot/cloudflare-skills@cloudflare-opennext -g -y
 # 8. Monorepo
 npx skills add giuseppe-trisciuoglio/developer-kit@turborepo-monorepo -g -y
 
-# 9. UI
+# 9. Observabilidade
+npx skills add https://cli.sentry.dev -g -y
+
+# 10. UI
 npx skillsadd shadcn/ui -g -y
 ```
 
@@ -290,4 +306,4 @@ npx skillsadd shadcn/ui -g -y
 | OpenNext (Cloudflare) | ✅ Boa | Community |
 | Turborepo | ✅ Boa | Oficial Vercel |
 | Shadcn/ui | ✅ Completa | Oficial |
-| Sentry | ❌ Lacuna | Criar skill |
+| Sentry | ✅ Oficial (14.5K installs) |
