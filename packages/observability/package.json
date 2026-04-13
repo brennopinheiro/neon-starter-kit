@@ -1,0 +1,15 @@
+{
+  "name": "@workspace/observability",
+  "version": "0.0.0",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@sentry/nextjs": "^9"
+  },
+  "devDependencies": {
+    "@workspace/config": "workspace:*",
+    "typescript": "^5"
+  }
+}

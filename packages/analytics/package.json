@@ -1,0 +1,18 @@
+{
+  "name": "@workspace/analytics",
+  "version": "0.0.0",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts",
+    "./server": "./src/server.ts",
+    "./client": "./src/client.ts"
+  },
+  "dependencies": {
+    "posthog-js": "^1",
+    "posthog-node": "^4"
+  },
+  "devDependencies": {
+    "@workspace/config": "workspace:*",
+    "typescript": "^5"
+  }
+}

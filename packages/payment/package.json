@@ -1,0 +1,17 @@
+{
+  "name": "@workspace/payment",
+  "version": "0.0.0",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts",
+    "./config": "./src/config.ts",
+    "./webhooks": "./src/webhooks.ts"
+  },
+  "dependencies": {
+    "stripe": "^17"
+  },
+  "devDependencies": {
+    "@workspace/config": "workspace:*",
+    "typescript": "^5"
+  }
+}

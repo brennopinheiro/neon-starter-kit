@@ -1,0 +1,18 @@
+{
+  "name": "@workspace/ai",
+  "version": "0.0.0",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts",
+    "./openrouter": "./src/openrouter.ts",
+    "./crypto": "./src/crypto.ts"
+  },
+  "dependencies": {
+    "@openrouter/ai-sdk-provider": "^0.4.3",
+    "ai": "^4"
+  },
+  "devDependencies": {
+    "@workspace/config": "workspace:*",
+    "typescript": "^5"
+  }
+}

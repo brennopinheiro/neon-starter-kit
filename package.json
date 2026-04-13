@@ -1,0 +1,25 @@
+{
+  "name": "neon-starter-kit",
+  "private": true,
+  "scripts": {
+    "build": "turbo build",
+    "dev": "turbo dev",
+    "lint": "turbo lint",
+    "test": "turbo test",
+    "test:e2e": "turbo test:e2e",
+    "db:generate": "pnpm --filter @workspace/database db:generate",
+    "db:migrate": "pnpm --filter @workspace/database db:migrate",
+    "db:studio": "pnpm --filter @workspace/database db:studio",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+  },
+  "devDependencies": {
+    "turbo": "^2",
+    "prettier": "^3",
+    "typescript": "^5"
+  },
+  "engines": {
+    "node": ">=20",
+    "pnpm": ">=9"
+  },
+  "packageManager": "pnpm@9.15.0"
+}

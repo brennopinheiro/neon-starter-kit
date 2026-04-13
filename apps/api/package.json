@@ -1,0 +1,21 @@
+{
+  "name": "@workspace/api",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "wrangler dev --port 3002",
+    "deploy": "wrangler deploy",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@workspace/database": "workspace:*",
+    "@workspace/payment": "workspace:*",
+    "stripe": "^17"
+  },
+  "devDependencies": {
+    "@workspace/config": "workspace:*",
+    "@cloudflare/workers-types": "^4",
+    "typescript": "^5",
+    "wrangler": "^4"
+  }
+}

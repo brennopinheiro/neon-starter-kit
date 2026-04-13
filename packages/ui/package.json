@@ -1,0 +1,20 @@
+{
+  "name": "@workspace/ui",
+  "version": "0.0.0",
+  "private": true,
+  "exports": {
+    "./*": "./src/components/*.tsx"
+  },
+  "dependencies": {
+    "@radix-ui/react-slot": "^1",
+    "class-variance-authority": "^0.7",
+    "clsx": "^2",
+    "tailwind-merge": "^2",
+    "react": "^19"
+  },
+  "devDependencies": {
+    "@workspace/config": "workspace:*",
+    "@types/react": "^19",
+    "typescript": "^5"
+  }
+}

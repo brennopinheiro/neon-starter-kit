@@ -1,0 +1,17 @@
+{
+  "name": "@workspace/auth",
+  "version": "0.0.0",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts",
+    "./client": "./src/client.ts"
+  },
+  "dependencies": {
+    "@workspace/database": "workspace:*",
+    "better-auth": "^1.2.7"
+  },
+  "devDependencies": {
+    "@workspace/config": "workspace:*",
+    "typescript": "^5"
+  }
+}
