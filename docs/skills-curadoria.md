@@ -247,22 +247,52 @@ OpenRouter é compatível diretamente com o Vercel AI SDK — sem adapter adicio
 
 ## TESTES
 
-### Vitest + Playwright — Sem skills oficiais
+### Vite — QUASE OFICIAL ✅
 
-Não foram encontradas skills oficiais para Vitest ou Playwright no skills.sh. Para o boilerplate:
+**Repo:** `antfu/skills` — mantido por Anthony Fu (criador e maintainer do Vite + Vitest) — **16.4K installs**
 
-- **Vitest**: bem documentado, zero configuração em projetos TypeScript modernos. Usar docs oficiais.
-- **Playwright**: skill community disponível:
+| Skill | Install | Installs | Cobre |
+|---|---|---|---|
+| `vite` | `npx skills add antfu/skills@vite -g -y` | 16.4K | Vite config, plugins, build pipeline, HMR, SSR mode |
+
+> antfu é o principal maintainer do Vite e Vitest — essa skill é praticamente oficial.
+
+---
+
+### Vitest — Community ✅
+
+| Skill | Install | Installs | Cobre |
+|---|---|---|---|
+| `vitest` | `npx skills add hairyf/skills@vitest -g -y` | 449 | Testes unitários, mocks, coverage, setup files |
+| `vitest` (pedronauck) | `npx skills add pedronauck/skills@vitest -g -y` | 49 | Alternativa community |
+
+> **Nota:** Vitest roda independente do Vite no contexto deste boilerplate (Next.js usa Turbopack, não Vite). Mas a skill `antfu/vite` também cobre configuração de Vitest.
+
+---
+
+### Playwright — Community ✅
+
+| Skill | Install | Installs | Cobre |
+|---|---|---|---|
+| `playwright-e2e-testing` | `npx skills add bobmatnyc/claude-mpm-skills@playwright-e2e-testing -g -y` | 2.6K | Testes E2E, page objects, assertions, CI integration |
+| `playwright-testing` | `npx skills add alinaqi/claude-bootstrap@playwright-testing -g -y` | 621 | Setup, fixtures, screenshots |
+
+---
+
+### Fluxos E2E essenciais para este boilerplate
 
 ```bash
-npx skills add jeremylongshore/claude-code-plugins-plus-skills@playwright-e2e -g -y  # se disponível
+# Instalar skills de testing
+npx skills add antfu/skills@vite -g -y
+npx skills add hairyf/skills@vitest -g -y
+npx skills add bobmatnyc/claude-mpm-skills@playwright-e2e-testing -g -y
 ```
 
-**Fluxos E2E essenciais a cobrir no boilerplate:**
-1. Signup → verificação de email → onboarding (criar org) → dashboard
-2. Convite de membro → aceitar convite → acesso à org
-3. Upgrade de plano → Stripe Checkout → webhook → plano atualizado
-4. Cancelamento → webhook → downgrade
+**4 fluxos obrigatórios a cobrir:**
+1. `signup → email verification → onboarding (criar org) → dashboard`
+2. `invite member → accept invite → org access`
+3. `upgrade plan → Stripe Checkout → webhook → plan updated`
+4. `cancellation → webhook → downgrade`
 
 ---
 
@@ -337,6 +367,11 @@ npx skills add https://cli.sentry.dev -g -y
 
 # 11. UI
 npx skillsadd shadcn/ui -g -y
+
+# 12. Testes
+npx skills add antfu/skills@vite -g -y
+npx skills add hairyf/skills@vitest -g -y
+npx skills add bobmatnyc/claude-mpm-skills@playwright-e2e-testing -g -y
 ```
 
 ---
@@ -360,3 +395,6 @@ npx skillsadd shadcn/ui -g -y
 | Shadcn/ui | ✅ Completa | Oficial |
 | Sentry | ✅ Oficial (14.5K installs) |
 | OpenRouter / pgvector / Fal.ai | Cobertos por ai-sdk + neon-postgres |
+| Vite | ✅ Quase oficial — antfu (16.4K installs) |
+| Vitest | ✅ Community (449 installs) |
+| Playwright | ✅ Community (2.6K installs) |
