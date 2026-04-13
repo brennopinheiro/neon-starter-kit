@@ -93,6 +93,41 @@
 - pgvector no Neon: suficiente para RAG e busca semântica até escala significativa
 - Fal.ai (geração de imagens) e Cloudflare Workers AI ficam fora do boilerplate base — adicionar por projeto
 
+### UI / Design System
+
+| Ferramenta | Uso |
+|---|---|
+| **shadcn/ui** | Componentes base — copy-paste, sem runtime CSS-in-JS, edge-safe |
+| **Tailwind CSS v4** | Utilitários + design tokens via `@theme` |
+| **CSS Variables (OKLCH)** | Ponto único de customização: cor, fonte, radius — editar só `globals.css` |
+| **next-themes** | Dark mode sem flash, persiste em cookie |
+
+**Como customizar o design (trocar cor, fonte, radius):**
+Editar um único arquivo: `apps/app/src/styles/globals.css`
+
+```css
+/* globals.css — alterar apenas estas variáveis para rebrandar o SaaS inteiro */
+@layer base {
+  :root {
+    --background:     0 0% 100%;
+    --foreground:     240 10% 3.9%;
+    --primary:        240 5.9% 10%;       /* ← cor principal */
+    --primary-foreground: 0 0% 98%;
+    --radius:         0.5rem;             /* ← arredondamento geral */
+    --font-sans:      "Inter", sans-serif; /* ← fonte principal */
+    --font-heading:   "Cal Sans", sans-serif;
+  }
+  .dark {
+    --background:     240 10% 3.9%;
+    --foreground:     0 0% 98%;
+    --primary:        0 0% 98%;
+  }
+}
+```
+
+> **Por que não Chakra UI ou SaaS UI?**
+> Chakra e SaaS UI usam CSS-in-JS (emotion/styled-system) que tem problemas no Cloudflare edge runtime — aumenta bundle e pode causar erros de hidratação com RSC. shadcn/ui é zero-runtime: são apenas componentes React + Tailwind classes, sem nada que precise rodar no servidor ou edge para gerar estilos.
+
 ### Qualidade & Testes
 
 | Ferramenta | Uso |
@@ -498,6 +533,25 @@ OPENROUTER_API_KEY="sk-or-..."
 | Cloudflare Rate Limiting | Incluído no plano free (1M requests/mês) |
 | Upstash (opcional) | 10K requests/dia — só se precisar de limite por usuário |
 | OpenRouter | Pay-per-use, sem free tier fixo — mas acesso a modelos gratuitos (Llama, Gemini Flash free) |
+
+---
+
+## Compatibilidade — Gaps Conhecidos
+
+> Leitura obrigatória antes de começar: **`docs/compatibility-guide.md`**
+
+Resumo dos 8 pontos críticos pesquisados (abril/2026):
+
+| Risco | Severidade | Fix |
+|---|---|---|
+| Bundle Next.js > 10MB no CF Worker | 🟡 Médio | `serverExternalPackages` + tree-shaking |
+| Neon driver errado no edge | 🔴 Crítico | Sempre `@neondatabase/serverless`, nunca `pg` |
+| Pool de DB global no edge | 🔴 Crítico | Criar Pool dentro do request handler |
+| Better Auth com `node-postgres` | 🔴 Crítico | Usar `drizzle-orm/neon-http` adapter |
+| AI SDK streaming via RSC | 🟡 Médio | Mover para Route Handler com `runtime = "edge"` |
+| PostHog em Server Components | 🟡 Médio | `posthog-js` client + `posthog-node` server — separados |
+| pgvector similarity no edge | 🟡 Médio | Route Handler sem `runtime = "edge"` (Node serverless) |
+| ISR sem KV wiring | 🟡 Médio | `export const dynamic = "force-dynamic"` |
 
 ---
 

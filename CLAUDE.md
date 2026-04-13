@@ -137,6 +137,29 @@ pnpm test:e2e       # Playwright
 
 ---
 
+## Regras de compatibilidade Cloudflare edge (INVIOLÁVEIS)
+
+> Detalhes completos: `docs/compatibility-guide.md`
+
+1. **Nunca** importar `pg` ou `node-postgres` — sempre `@neondatabase/serverless`
+2. **Nunca** criar `Pool` ou `Client` do Neon globalmente — sempre dentro do request handler com `ctx.waitUntil(pool.end())`
+3. **Nunca** usar `posthog.capture()` em Server Components — `posthog-js` é client-only, `posthog-node` para servidor
+4. **Nunca** fazer queries de similaridade pgvector com `export const runtime = "edge"` — manter em Node serverless
+5. **Sempre** declarar `export const dynamic = "force-dynamic"` em rotas com dados em tempo real (ISR não está wired)
+6. **Toda** lógica de streaming de IA vai em Route Handler com `runtime = "edge"` — não inline em Server Components
+7. Trigger.dev jobs são disparados via HTTP (`tasks.trigger(...)`) — nunca importar lógica de job no edge
+8. Testar com `wrangler pages dev` localmente antes de qualquer deploy no CF Pages
+
+## Design System — como customizar
+
+Editar **apenas** `apps/app/src/styles/globals.css` para rebrandar:
+- `--primary` → cor principal
+- `--font-sans` / `--font-heading` → fontes
+- `--radius` → arredondamento geral
+- Adicionar paleta `.dark` para dark mode
+
+**Não usar** Chakra UI ou SaaS UI — dependem de CSS-in-JS (emotion) que tem problemas no CF edge runtime e aumenta bundle.
+
 ## Convenções de código
 
 - TypeScript strict em todos os packages
