@@ -1,55 +1,67 @@
 # Curadoria de Skills — SaaS Starter Kit
 
-> Skills do Claude Code que cobrem cada camada da stack. Instalar antes de começar a construir o boilerplate — cada skill injeta contexto técnico atualizado no AI, aumentando precisão e velocidade.
+> Skills do Claude Code mapeadas por camada da stack. Organizadas em: Oficiais (mantidas pelo próprio criador da lib) → Community (bem testadas) → Lacunas (criar ao longo do boilerplate).
+>
+> Fontes pesquisadas: skills.sh · skillsmp.com · GitHub · lobehub.com
 
 ---
 
-## Como instalar uma skill
+## Como instalar
 
 ```bash
-# Instalação global (disponível em qualquer projeto)
+# Global — disponível em todos os projetos futuros (recomendado para libs agnósticas)
 npx skills add <owner/repo@skill> -g -y
 
-# Instalação local (apenas neste projeto)
+# Local — apenas neste projeto
 npx skills add <owner/repo@skill>
 ```
 
-Após instalar, a skill fica disponível como slash command no Claude Code: `/nome-da-skill`
+Após instalar: slash command `/nome-da-skill` fica disponível no Claude Code.
 
 ---
 
-## Skills OFICIAIS (mantidas pelos criadores da tecnologia)
+## BANCO DE DADOS
 
-### Neon — Banco de Dados
+### Neon — OFICIAL ✅
 
-**Repositório:** `neondatabase/agent-skills` — mantido pelo time Neon
+**Repo:** `neondatabase/agent-skills`
 
-| Skill | Comando | Cobre |
-|---|---|---|
-| `neon-postgres` | `npx skills add neondatabase/agent-skills@neon-postgres -g -y` | Conexão serverless, Neon CLI, branching, Drizzle setup, Auth, Platform API |
-| `claimable-postgres` | `npx skills add neondatabase/agent-skills@claimable-postgres -g -y` | DB throwaway via `neon.new` — útil para testes isolados |
-| `neon-postgres-egress-optimizer` | `npx skills add neondatabase/agent-skills@neon-postgres-egress-optimizer -g -y` | Diagnóstico de overfetching e otimização de custos |
+| Skill | Install | Installs | Cobre |
+|---|---|---|---|
+| `neon-postgres` | `npx skills add neondatabase/agent-skills@neon-postgres -g -y` | — | Conexão serverless, Neon CLI, branching, Drizzle setup, Auth, Platform API |
+| `claimable-postgres` | `npx skills add neondatabase/agent-skills@claimable-postgres -g -y` | — | DB throwaway via `neon.new` — útil para testes isolados |
+| `neon-postgres-egress-optimizer` | `npx skills add neondatabase/agent-skills@neon-postgres-egress-optimizer -g -y` | — | Diagnóstico de overfetching, otimização de custos |
 
-**Bônus:** Postgres best practices gerais curadas por membros do PostgreSQL Core Team:
+**Bônus — Postgres best practices genéricas** (curadas por membros do PostgreSQL Core Team):
 ```bash
 npx skills add neondatabase/postgres-skills -g -y
 ```
 
 ---
 
-### Better Auth — Autenticação
+### Drizzle ORM — Community ✅
 
-**Repositório:** `better-auth/skills` — mantido pelo time Better Auth
+| Skill | Install | Cobre |
+|---|---|---|
+| `drizzle-orm` | `npx skills add oldirty/drizzle-orm-skill -g -y` | Schema PostgreSQL, migrations, queries, joins, transactions, `drizzle.config.ts`. Busca docs em tempo real. |
 
-| Skill | Comando | Cobre |
+---
+
+## AUTENTICAÇÃO
+
+### Better Auth — OFICIAL ✅
+
+**Repo:** `better-auth/skills`
+
+| Skill | Install | Cobre |
 |---|---|---|
 | `best-practices` | `npx skills add better-auth/skills@best-practices -g -y` | Config server/client, adapters, sessões, plugins, env vars |
 | `organization` | `npx skills add better-auth/skills@organization -g -y` | Plugin multi-tenant: roles, convites, member management |
-| `create-auth` | `npx skills add better-auth/skills@create-auth -g -y` | Scaffold inicial de nova auth layer |
+| `create-auth` | `npx skills add better-auth/skills@create-auth -g -y` | Scaffold de nova auth layer |
 | `emailAndPassword` | `npx skills add better-auth/skills@emailAndPassword -g -y` | Fluxo email/senha, verificação, reset |
 | `twoFactor` | `npx skills add better-auth/skills@twoFactor -g -y` | Setup 2FA |
 
-> **Instalação via plugin marketplace (alternativa):**
+> Alternativa via plugin marketplace (instala tudo de uma vez):
 > ```
 > /plugin marketplace add better-auth/skills
 > /plugin install auth-skills
@@ -57,121 +69,174 @@ npx skills add neondatabase/postgres-skills -g -y
 
 ---
 
-### Trigger.dev — Background Jobs
+## EMAIL
 
-**Repositório:** `triggerdotdev/skills` — mantido pelo time Trigger.dev (v3)
+### Resend — OFICIAL ✅
 
-| Skill | Comando | Cobre |
-|---|---|---|
-| `trigger-setup` | `npx skills add triggerdotdev/skills@trigger-setup -g -y` | SDK install, `npx trigger init`, primeiro task |
-| `trigger-tasks` | `npx skills add triggerdotdev/skills@trigger-tasks -g -y` | Tasks duráveis, batch, retry, cron, concorrência, debounce |
-| `trigger-config` | `npx skills add triggerdotdev/skills@trigger-config -g -y` | Build extensions (Prisma, Playwright, FFmpeg), env sync |
-| `trigger-agents` | `npx skills add triggerdotdev/skills@trigger-agents -g -y` | Workflows com LLM, human-in-the-loop, orquestração |
-| `trigger-realtime` | `npx skills add triggerdotdev/skills@trigger-realtime -g -y` | React hooks, streaming de progresso para UI |
-| `trigger-cost-savings` | `npx skills add triggerdotdev/skills@trigger-cost-savings -g -y` | Análise de custos de execução |
+**Repo:** `resend/resend-skills` e `resend/react-email`
+
+| Skill | Install | Installs | Cobre |
+|---|---|---|---|
+| `resend` | `npx skills add resend/resend-skills@resend -g -y` | 5.5K | Envio único e batch (até 100), idempotency keys, retries, inbound email, webhooks com verificação de assinatura, gerenciamento de domínios/contatos, broadcasts, automações |
+| `react-email` | `npx skills add resend/react-email@react-email -g -y` | 4.1K | Componentes de email (Html, Button, Image, CodeBlock...), Tailwind pixel-based, preview local, i18n, renderização HTML/plain text |
+| `email-best-practices` | `npx skills add resend/email-best-practices -g -y` | — | SPF/DKIM/DMARC, anti-spam, templates transacionais, compliance LGPD/GDPR, double opt-in, bounce tracking |
+
+> **Nota:** batch send não suporta anexos nem agendamento.
 
 ---
 
-### PostHog — Analytics
+## BACKGROUND JOBS
 
-**Repositório:** `posthog/posthog-for-claude` — mantido pelo time PostHog (auto-atualizado a cada release)
+### Trigger.dev v3 — OFICIAL ✅
 
-| Skill | Comando | Instalações | Cobre |
+**Repo:** `triggerdotdev/skills`
+
+| Skill | Install | Cobre |
+|---|---|---|
+| `trigger-setup` | `npx skills add triggerdotdev/skills@trigger-setup -g -y` | SDK install, `npx trigger init`, primeiro task |
+| `trigger-tasks` | `npx skills add triggerdotdev/skills@trigger-tasks -g -y` | Tasks duráveis, batch, retry, cron, concorrência, debounce, checkpointing |
+| `trigger-config` | `npx skills add triggerdotdev/skills@trigger-config -g -y` | Build extensions (Prisma, Playwright, FFmpeg, Python), env sync, telemetry |
+| `trigger-agents` | `npx skills add triggerdotdev/skills@trigger-agents -g -y` | Workflows LLM, orquestrador-workers, human-in-the-loop, evaluator-optimizer |
+| `trigger-realtime` | `npx skills add triggerdotdev/skills@trigger-realtime -g -y` | React hooks, streaming de progresso para UI, wait tokens |
+| `trigger-cost-savings` | `npx skills add triggerdotdev/skills@trigger-cost-savings -g -y` | Análise e redução de custo de execuções |
+
+---
+
+## ANALYTICS
+
+### PostHog — OFICIAL ✅
+
+**Repo:** `posthog/posthog-for-claude` — auto-atualizado a cada release do PostHog
+
+| Skill | Install | Installs | Cobre |
 |---|---|---|---|
-| `posthog-instrumentation` | `npx skills add posthog/posthog-for-claude@posthog-instrumentation -g -y` | 558 | Setup Next.js App Router (15.3+), feature flags, eventos, identify |
+| `posthog-instrumentation` | `npx skills add posthog/posthog-for-claude@posthog-instrumentation -g -y` | 558 | Setup Next.js App Router 15.3+, feature flags, eventos, identify de usuário |
 
-> **Via plugin marketplace (instala todas as skills PostHog):**
+> Via plugin marketplace (instala todas as skills PostHog):
 > ```
 > /plugin marketplace add PostHog/skills
 > /plugin install posthog-all@posthog-skills
 > ```
 
-Skills extras (community, `jeremylongshore`):
-```bash
-npx skills add jeremylongshore/claude-code-plugins-plus-skills@posthog-install-auth -g -y
-npx skills add jeremylongshore/claude-code-plugins-plus-skills@posthog-performance-tuning -g -y
-```
+---
+
+## BILLING
+
+### Stripe — Sem skill oficial da Stripe no skills.sh
+
+Melhor seleção disponível:
+
+| Skill | Install | Installs | Qualidade | Cobre |
+|---|---|---|---|---|
+| `subscription-management` | `npx skills add claude-office-skills/skills@subscription-management -g -y` | 502 | Community | Gestão de assinaturas, lifecycle completo |
+| `stripe-sync` | `npx skills add andrelandgraf/fullstackrecipes@stripe-sync -g -y` | 73 | Community | Sync Stripe ↔ banco de dados, webhooks |
+| `stripe-integration-expert` | `npx skills add borghei/claude-skills@stripe-integration-expert -g -y` | 43 | Community | Integração completa Stripe |
+| `stripe-best-practices` | `npx skills add smithery.ai@stripe-best-practices -g -y` | 14 | Community | Best practices gerais |
+| `stripe-local-dev` | `npx skills add phrazzld/claude-config@stripe-local-dev -g -y` | 21 | Community | Setup local Stripe CLI + webhook forwarding |
+
+> **Recomendação:** `stripe-sync` (andrelandgraf) é o mais específico para o padrão que vamos usar (webhook → update no banco). `stripe-local-dev` é essencial para dev.
+
+> **Alternativa avançada (não no skills.sh):** `Alex647648/saas-skills-suite` — `mvp-billing-system` — skill construída de 4 dias de implementação real: multi-plano, créditos, idempotency. Requer adaptação da camada Supabase → Neon.
 
 ---
 
-## Skills COMMUNITY (bem avaliadas)
+## DEPLOY / INFRAESTRUTURA
 
-### Cloudflare + Next.js
+### Cloudflare — OFICIAL ✅
 
-| Skill | Comando | Installs | Cobre |
+**Repo:** `cloudflare/skills` — 9K installs
+
+| Skill | Install | Installs | Cobre |
 |---|---|---|---|
-| `cloudflare-nextjs` | `npx skills add jackspace/claudeskillz@cloudflare-nextjs -g -y` | 82 | Next.js no Cloudflare Pages, configuração de build |
-| `cloudflare-opennext` | `npx skills add null-shot/cloudflare-skills@cloudflare-opennext -g -y` | 81 | `@opennextjs/cloudflare` especificamente — **mais relevante para nossa stack** |
+| `cloudflare` | `npx skills add cloudflare/skills@cloudflare -g -y` | 9K | Árvore de decisão para 50+ produtos Cloudflare: Workers, Pages, KV, R2, D1, Durable Objects, Zaraz, WAF, Wrangler, Terraform |
 
-### Neon + Next.js (React)
+> Inclui Zaraz (sob "Media/Tags") — sem skill dedicada para Zaraz, está consolidado aqui.
 
-```bash
-npx skills add neondatabase/neon-js@neon-js-react -g -y   # 14 installs
-```
-Cobre: Neon com React/Next.js, connection pooling, queries tipadas.
+**Skills Cloudflare complementares (community):**
 
-### Next.js Full Stack Geral
-
-```bash
-npx skills add saccoai/agent-skills@nextjs-fullstack -g -y  # 12 installs
-npx skills add andrelandgraf/fullstackrecipes@base-app-setup -g -y  # 81 installs
-```
-
-### Drizzle ORM
-
-```bash
-npx skills add oldirty/drizzle-orm-skill -g -y
-```
-Cobre: schema PostgreSQL, migrations, queries (select/insert/update/delete), joins, transactions, `drizzle.config.ts`. Busca docs em tempo real de `orm.drizzle.team/docs/`.
-
-### Stripe (Billing)
-
-Não existe skill oficial da Stripe. Melhores opções:
-
-| Skill | Comando | Installs | Cobre |
+| Skill | Install | Installs | Cobre |
 |---|---|---|---|
-| `stripe-integration-expert` | `npx skills add alirezarezvani/claude-skills@stripe-integration-expert -g -y` | 5 | Integração completa |
-| `fix-stripe` | `npx skills add phrazzld/claude-config@fix-stripe -g -y` | 22 | Debug de erros Stripe comuns |
-| `stripe-local-dev` | `npx skills add phrazzld/claude-config@stripe-local-dev -g -y` | 21 | Setup local com Stripe CLI + webhook forwarding |
-| `log-stripe-issues` | `npx skills add phrazzld/claude-config@log-stripe-issues -g -y` | 22 | Logging de problemas de billing |
+| `cloudflare` (dmmulroy) | `npx skills add dmmulroy/cloudflare-skill@cloudflare -g -y` | 305 | Alternativa com foco em Workers |
+| `workers-security` | `npx skills add secondsky/claude-skills@workers-security -g -y` | 88 | Segurança específica para Workers |
 
-> **Nota:** Para billing robusto (multi-plano, créditos, ciclo de vida), revisar manualmente o `Alex647648/saas-skills-suite` — skill `mvp-billing-system` — foi construída a partir de 4 dias de implementação real. Requer adaptação da camada Supabase → Neon.
+**Next.js + Cloudflare (opennextjs):**
+
+| Skill | Install | Installs | Cobre |
+|---|---|---|---|
+| `cloudflare-opennext` | `npx skills add null-shot/cloudflare-skills@cloudflare-opennext -g -y` | 81 | `@opennextjs/cloudflare` especificamente |
+| `cloudflare-nextjs` | `npx skills add jackspace/claudeskillz@cloudflare-nextjs -g -y` | 82 | Next.js no Cloudflare Pages, build config |
 
 ---
 
-## Skills JÁ DISPONÍVEIS nesta sessão (não precisam instalar)
+## MONOREPO / TURBOREPO
 
-Estas skills já estão ativas no Claude Code:
+### Turborepo — OFICIAL Vercel ✅
 
-| Skill | Slug | Cobre |
+**Repo:** `vercel/turborepo` (também disponível no skills.sh como `giuseppe-trisciuoglio/developer-kit@turborepo-monorepo`)
+
+| Skill | Install | Installs | Cobre |
+|---|---|---|---|
+| `turborepo-monorepo` | `npx skills add giuseppe-trisciuoglio/developer-kit@turborepo-monorepo -g -y` | 339 | turbo.json, task pipelines, `dependsOn`, caching, remote cache, CI (GitHub Actions), env vars, `--filter`, `--affected`, `turbo watch` |
+| `turborepo` | `npx skills add acedergren/agentic-tools@turborepo -g -y` | 18 | Turborepo avançado |
+| `monorepo-navigator` | `npx skills add borghei/claude-skills@monorepo-navigator -g -y` | 39 | Navegação em monorepos complexos |
+
+---
+
+## UI / COMPONENTES
+
+### Shadcn/ui — OFICIAL ✅
+
+**Repo:** `shadcn-ui/ui` — 81.8K installs no skills.sh
+
+| Skill | Install | Installs | Cobre |
+|---|---|---|---|
+| `shadcn` (oficial) | `npx skillsadd shadcn/ui -g -y` ou `pnpm dlx skills add shadcn/ui -g -y` | 81.8K | Lê `components.json`, CLI (`init`, `add`, `search`, `diff`), theming OKLCH, dark mode, registry, padrões de composição |
+| `shadcn-ui` (community) | `npx skills add existential-birds/beagle@shadcn-ui -g -y` | 223 | Alternativa community bem testada |
+
+> Skills já ativas nesta sessão: `vercel:shadcn` (básica) — instalar a oficial `shadcn/ui` para cobertura completa.
+
+---
+
+## OBSERVABILIDADE
+
+### Sentry — Lacuna ⚠️
+
+Nenhuma skill oficial ou community relevante encontrada para Sentry. Criar nossa própria ao longo do boilerplate.
+
+---
+
+## SKILLS JÁ ATIVAS NESTA SESSÃO
+
+Não precisam instalar — disponíveis via slash command:
+
+| Skill | Slug | Relevância |
 |---|---|---|
-| Vercel Next.js | `vercel:nextjs` | Next.js com Vercel — padrões App Router |
-| Vercel Next Best Practices | `vercel:react-best-practices` | RSC, Server Actions, hidratação |
+| Vercel Next.js | `vercel:nextjs` | App Router, data fetching |
+| Vercel React Best Practices | `vercel:react-best-practices` | RSC, Server Actions, hidratação |
 | Vercel Next Cache | `vercel:next-cache-components` | PPR, `use cache`, cache profiles |
-| Vercel Shadcn | `vercel:shadcn` | shadcn/ui components |
-| Vercel AI SDK | `vercel:ai-sdk` | AI SDK (quando o produto tiver IA) |
-| Supabase Postgres | `supabase-postgres-best-practices` | Patterns PostgreSQL (muitos aplicáveis ao Neon) |
-| Next Best Practices | `next-best-practices` | Já instalada |
+| Vercel Shadcn | `vercel:shadcn` | shadcn/ui (básico) |
+| Vercel AI SDK | `vercel:ai-sdk` | Para quando o SaaS tiver IA |
+| Supabase Postgres | `supabase-postgres-best-practices` | Patterns PostgreSQL aplicáveis ao Neon |
+| Next Best Practices | `next-best-practices` | Next.js genérico |
 | Vercel Composition | `vercel:composition-patterns` | React compound components |
 
 ---
 
-## Lacunas — Sem skill oficial disponível
+## LACUNAS — Skills a criar neste boilerplate
 
-| Tecnologia | Situação | Workaround |
+| Tecnologia | Lacuna | Plano |
 |---|---|---|
-| **Turborepo / pnpm workspaces** | Nenhuma skill dedicada encontrada | Documentar no CLAUDE.md do projeto |
-| **Cloudflare Workers (API)** | Sem skill oficial Workers | `vercel:vercel-functions` cobre padrões similares |
-| **Cloudflare Zaraz** | Sem skill | Documentar config manual no CLAUDE.md |
-| **React Email / Resend** | Sem skill | Usar docs oficiais |
-| **Shadcn (free)** | Sem skill oficial gratuita | `vercel:shadcn` cobre o básico |
+| **Cloudflare Zaraz** | Coberto parcialmente pelo `cloudflare/skills`. Sem skill dedicada. | Criar `zaraz` skill com: config via dashboard, Zaraz Web API (`window.zaraz.track`, `zaraz.set`), setup PostHog via Zaraz |
+| **Sentry** | Zero skills disponíveis | Criar `sentry-nextjs` skill: `sentry.server.config.ts`, `sentry.client.config.ts`, source maps, alertas |
+| **pnpm workspaces** | Coberto parcialmente pelo Turborepo skill | Documentar no CLAUDE.md do boilerplate |
+| **React Email + Resend (integrado)** | Skills separadas existem, integração não | Criar `resend-react-email` skill combinando os dois |
 
 ---
 
 ## Ordem de instalação recomendada
 
 ```bash
-# 1. Banco de dados (base de tudo)
+# 1. Banco de dados
 npx skills add neondatabase/agent-skills@neon-postgres -g -y
 npx skills add neondatabase/postgres-skills -g -y
 npx skills add oldirty/drizzle-orm-skill -g -y
@@ -180,9 +245,10 @@ npx skills add oldirty/drizzle-orm-skill -g -y
 npx skills add better-auth/skills@best-practices -g -y
 npx skills add better-auth/skills@organization -g -y
 
-# 3. Deploy Cloudflare
-npx skills add null-shot/cloudflare-skills@cloudflare-opennext -g -y
-npx skills add jackspace/claudeskillz@cloudflare-nextjs -g -y
+# 3. Email
+npx skills add resend/resend-skills@resend -g -y
+npx skills add resend/react-email@react-email -g -y
+npx skills add resend/email-best-practices -g -y
 
 # 4. Background jobs
 npx skills add triggerdotdev/skills@trigger-setup -g -y
@@ -191,16 +257,37 @@ npx skills add triggerdotdev/skills@trigger-tasks -g -y
 # 5. Analytics
 npx skills add posthog/posthog-for-claude@posthog-instrumentation -g -y
 
-# 6. Billing (debug helpers)
+# 6. Billing
+npx skills add andrelandgraf/fullstackrecipes@stripe-sync -g -y
 npx skills add phrazzld/claude-config@stripe-local-dev -g -y
-npx skills add phrazzld/claude-config@fix-stripe -g -y
+
+# 7. Deploy / Infra
+npx skills add cloudflare/skills@cloudflare -g -y
+npx skills add null-shot/cloudflare-skills@cloudflare-opennext -g -y
+
+# 8. Monorepo
+npx skills add giuseppe-trisciuoglio/developer-kit@turborepo-monorepo -g -y
+
+# 9. UI
+npx skillsadd shadcn/ui -g -y
 ```
 
 ---
 
-## Decisão: instalar local vs global?
+## Status de cobertura por camada
 
-- **Global (`-g`):** Skills de tecnologias agnósticas ao projeto (Neon, Drizzle, Better Auth, Trigger.dev) — você vai usar em todos os SaaS futuros
-- **Local (sem `-g`):** Skills específicas de um projeto (ex: se um SaaS tiver um Stripe config muito particular)
-
-Para este boilerplate, **tudo global** faz sentido.
+| Camada | Cobertura | Qualidade |
+|---|---|---|
+| Neon / Postgres | ✅ Completa | Oficial |
+| Drizzle ORM | ✅ Boa | Community |
+| Better Auth | ✅ Completa | Oficial |
+| Resend + React Email | ✅ Completa | Oficial |
+| Trigger.dev v3 | ✅ Completa | Oficial |
+| PostHog | ✅ Boa | Oficial |
+| Stripe | ⚠️ Parcial | Community |
+| Cloudflare (geral) | ✅ Boa | Oficial |
+| Cloudflare Zaraz | ⚠️ Parcial | Coberto em cloudflare/skills |
+| OpenNext (Cloudflare) | ✅ Boa | Community |
+| Turborepo | ✅ Boa | Oficial Vercel |
+| Shadcn/ui | ✅ Completa | Oficial |
+| Sentry | ❌ Lacuna | Criar skill |
