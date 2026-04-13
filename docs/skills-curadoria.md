@@ -197,6 +197,33 @@ Melhor seleção disponível:
 
 ---
 
+## IA & AGENTES
+
+### Vercel AI SDK — OFICIAL ✅
+
+**Repo:** `vercel/ai` — **18.3K installs**
+
+| Skill | Install | Installs | Cobre |
+|---|---|---|---|
+| `ai-sdk` | `npx skills add vercel/ai/ai-sdk -g -y` | 18.3K | `generateText`, `streamText`, tool calling, agentes, RAG, `useChat`/`useCompletion`, OpenRouter via `@openrouter/ai-sdk-provider`, AI Gateway, DevTools |
+
+> Skills extras do mesmo repo (menos relevantes para este boilerplate):
+> - `develop-ai-functions-example` (658 installs) — exemplos práticos de funções AI
+> - `add-provider-package` (269 installs) — integrar novo provider no SDK
+
+**Integração com OpenRouter:**
+```bash
+pnpm add @openrouter/ai-sdk-provider ai
+```
+OpenRouter é compatível diretamente com o Vercel AI SDK — sem adapter adicional.
+
+**Lacuna — sem skills dedicadas encontradas para:**
+- OpenRouter (coberto dentro do `ai-sdk` skill)
+- pgvector / vetores no Neon (coberto pelo `neon-postgres` skill)
+- Fal.ai (sem skill — adicionar por projeto quando necessário)
+
+---
+
 ## OBSERVABILIDADE
 
 ### Sentry — OFICIAL ✅
@@ -281,10 +308,13 @@ npx skills add null-shot/cloudflare-skills@cloudflare-opennext -g -y
 # 8. Monorepo
 npx skills add giuseppe-trisciuoglio/developer-kit@turborepo-monorepo -g -y
 
-# 9. Observabilidade
+# 9. IA
+npx skills add vercel/ai/ai-sdk -g -y
+
+# 10. Observabilidade
 npx skills add https://cli.sentry.dev -g -y
 
-# 10. UI
+# 11. UI
 npx skillsadd shadcn/ui -g -y
 ```
 
@@ -300,6 +330,7 @@ npx skillsadd shadcn/ui -g -y
 | Resend + React Email | ✅ Completa | Oficial |
 | Trigger.dev v3 | ✅ Completa | Oficial |
 | PostHog | ✅ Boa | Oficial |
+| **Vercel AI SDK** | **✅ Completa** | **Oficial (18.3K)** |
 | Stripe | ⚠️ Parcial | Community |
 | Cloudflare (geral) | ✅ Boa | Oficial |
 | Cloudflare Zaraz | ⚠️ Parcial | Coberto em cloudflare/skills |
@@ -307,3 +338,4 @@ npx skillsadd shadcn/ui -g -y
 | Turborepo | ✅ Boa | Oficial Vercel |
 | Shadcn/ui | ✅ Completa | Oficial |
 | Sentry | ✅ Oficial (14.5K installs) |
+| OpenRouter / pgvector / Fal.ai | Cobertos por ai-sdk + neon-postgres |

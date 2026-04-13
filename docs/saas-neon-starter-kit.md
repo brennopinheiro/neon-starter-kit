@@ -15,8 +15,10 @@
 | JWT custom auth | Substituir → **Better Auth** | Plugin nativo de Organizations (multi-tenant), self-hosted, sem custo por usuário |
 | Axiom (observability) | Substituir → **Sentry** | Error tracking com stack traces, session replay e alertas mais completos |
 | Vercel (deploy) | Substituir → **Cloudflare Pages** | Edge global, Workers integrados, Zaraz nativo, sem cold starts, custo menor |
+| `@cloudflare/next-on-pages` | Substituir → **`@opennextjs/cloudflare`** | Pacote descontinuado — OpenNext é o substituto oficial com suporte completo ao App Router |
 | — | Adicionar → **Astro** (apps/web) | Marketing site e landing page estáticos com performance máxima no edge |
 | — | Adicionar → **Cloudflare Zaraz** | Tag manager server-side no edge: sem scripts pesados no cliente, privacidade melhorada |
+| — | Adicionar → **`packages/ai`** | Camada de IA: Vercel AI SDK + OpenRouter + pgvector — a maioria dos SaaS vai precisar |
 
 ---
 
@@ -26,7 +28,7 @@
 
 | Camada | Tecnologia |
 |---|---|
-| Framework (dashboard) | Next.js 15 (App Router) via `@cloudflare/next-on-pages` |
+| Framework (dashboard) | Next.js 15 (App Router) via `@opennextjs/cloudflare` |
 | Framework (marketing) | Astro 5 — SSG/SSR no Cloudflare Pages |
 | Linguagem | TypeScript (strict) |
 | Monorepo | Turborepo + pnpm workspaces |
@@ -75,7 +77,21 @@
 
 | Ferramenta | Uso |
 |---|---|
-| **Trigger.dev** | Jobs assíncronos: envio de emails, webhooks, relatórios, sync |
+| **Trigger.dev** | Jobs assíncronos: envio de emails, webhooks, relatórios, sync, pipelines de IA |
+
+### IA & Agentes
+
+| Ferramenta | Uso |
+|---|---|
+| **Vercel AI SDK** | Unified SDK para LLMs: `generateText`, `streamText`, tool calling, agentes, RAG |
+| **OpenRouter** | Gateway para 300+ modelos (Claude, GPT-4o, Gemini, Llama) — uma chave, todos os modelos |
+| **Neon pgvector** | Banco vetorial via extensão PostgreSQL — sem serviço extra, queries junto com dados de negócio |
+
+**Decisões de design:**
+- OpenRouter como provider padrão via `@openrouter/ai-sdk-provider` (compatível com Vercel AI SDK)
+- Chave de API armazenada por organização no banco (criptografada) — cada org usa a própria chave
+- pgvector no Neon: suficiente para RAG e busca semântica até escala significativa
+- Fal.ai (geração de imagens) e Cloudflare Workers AI ficam fora do boilerplate base — adicionar por projeto
 
 ### Qualidade & Testes
 
@@ -110,14 +126,15 @@ my-saas/
 │
 ├── packages/
 │   ├── auth/         # Better Auth config + plugins (organization, admin)
-│   ├── database/     # Drizzle schema, migrations, client Neon
+│   ├── database/     # Drizzle schema, migrations, client Neon + pgvector
 │   ├── types/        # Tipos TypeScript compartilhados
 │   ├── ui/           # Shadcn/ui component library
 │   ├── payment/      # Stripe helpers, pricing config, webhook handlers
 │   ├── email/        # Resend + React Email templates
 │   ├── analytics/    # PostHog helpers (server + client) + Zaraz web API
 │   ├── observability/ # Sentry config (server, client, edge)
-│   └── jobs/         # Trigger.dev background jobs
+│   ├── jobs/         # Trigger.dev background jobs
+│   └── ai/           # Vercel AI SDK + OpenRouter provider + pgvector helpers
 │
 ├── turbo.json
 ├── pnpm-workspace.yaml
@@ -147,7 +164,7 @@ Root directory:  /
 // apps/app/package.json
 {
   "scripts": {
-    "pages:build": "npx @cloudflare/next-on-pages",
+    "pages:build": "npx @opennextjs/cloudflare",
     "build": "next build"
   }
 }
@@ -284,6 +301,94 @@ export const projects = pgTable("projects", {
 
 ---
 
+## Camada de IA
+
+### Vercel AI SDK + OpenRouter
+
+```typescript
+// packages/ai/src/client.ts
+import { createOpenRouter } from "@openrouter/ai-sdk-provider"
+
+// Provider padrão: OpenRouter (acesso a 300+ modelos com uma chave)
+export const openrouter = createOpenRouter({
+  apiKey: process.env.OPENROUTER_API_KEY,
+})
+
+// Modelos disponíveis — trocar apenas o string, sem mudar código
+export const models = {
+  default:  openrouter("anthropic/claude-3-5-sonnet"),
+  fast:     openrouter("google/gemini-flash-1.5"),
+  powerful: openrouter("anthropic/claude-opus-4"),
+  cheap:    openrouter("meta-llama/llama-3.1-8b-instruct:free"),
+} as const
+
+export type ModelKey = keyof typeof models
+```
+
+```typescript
+// packages/ai/src/vector.ts
+import { embed } from "ai"
+import { openrouter } from "./client"
+import { db } from "@workspace/database"
+import { embeddings } from "@workspace/database/schema"
+import { cosineDistance, desc, gt, sql } from "drizzle-orm"
+
+const embeddingModel = openrouter.embedding("openai/text-embedding-3-small")
+
+export async function generateEmbedding(text: string) {
+  const { embedding } = await embed({ model: embeddingModel, value: text })
+  return embedding
+}
+
+export async function searchSimilar(orgId: string, query: string, limit = 5) {
+  const queryEmbedding = await generateEmbedding(query)
+  const similarity = sql<number>`1 - (${cosineDistance(embeddings.embedding, queryEmbedding)})`
+
+  return db
+    .select({ content: embeddings.content, similarity })
+    .from(embeddings)
+    .where(gt(similarity, 0.5))
+    .orderBy(desc(similarity))
+    .limit(limit)
+}
+```
+
+### Schema AI (Drizzle)
+
+```typescript
+// packages/database/src/schema.ts — adicionar às tabelas existentes
+
+import { vector } from "drizzle-orm/pg-core"
+
+// Configurações de IA por organização
+export const aiSettings = pgTable("ai_settings", {
+  orgId:            text("org_id").references(() => organizations.id, { onDelete: "cascade" }).primaryKey(),
+  openrouterApiKey: text("openrouter_api_key"),  // criptografado com AES-256
+  defaultModel:     text("default_model").default("anthropic/claude-3-5-sonnet"),
+  updatedAt:        timestamp("updated_at").defaultNow(),
+})
+
+// Tabela de embeddings (pgvector) — base para RAG
+export const embeddings = pgTable("embeddings", {
+  id:         text("id").primaryKey(),
+  orgId:      text("org_id").references(() => organizations.id, { onDelete: "cascade" }).notNull(),
+  content:    text("content").notNull(),
+  embedding:  vector("embedding", { dimensions: 1536 }).notNull(),  // text-embedding-3-small
+  metadata:   jsonb("metadata"),                                      // dados livres por projeto
+  createdAt:  timestamp("created_at").defaultNow(),
+})
+
+// Migration necessária no Neon: CREATE EXTENSION vector;
+```
+
+### Rota de Settings AI
+
+```
+/[orgSlug]/settings/ai    — Formulário: chave OpenRouter + modelo padrão
+```
+
+---
+
 ## Variáveis de Ambiente
 
 ```env
@@ -323,6 +428,11 @@ NEXT_PUBLIC_POSTHOG_HOST="https://app.posthog.com"
 # Trigger.dev
 TRIGGER_API_KEY="tr_..."
 TRIGGER_API_URL="https://api.trigger.dev"
+
+# IA — OpenRouter (gateway para 300+ modelos)
+OPENROUTER_API_KEY="sk-or-..."
+# Por org: chave salva no banco (ai_settings.openrouter_api_key), criptografada
+# AI_ENCRYPTION_KEY="..."  # para criptografar chaves de API no banco
 ```
 
 ---
@@ -342,6 +452,7 @@ TRIGGER_API_URL="https://api.trigger.dev"
 - `/[orgSlug]/settings` — Configurações da org (nome, slug, membros)
 - `/[orgSlug]/settings/billing` — Portal Stripe embutido
 - `/[orgSlug]/settings/members` — Convites e gestão de roles
+- `/[orgSlug]/settings/ai` — Chave OpenRouter da org + modelo padrão
 - `/admin` — Painel interno (lista de orgs, impersonation, override de plano)
 
 ### Auth
@@ -364,6 +475,10 @@ TRIGGER_API_URL="https://api.trigger.dev"
 | Audit log | Tabela `events` no Drizzle | Clientes enterprise ou compliance LGPD |
 | Real-time | Cloudflare Durable Objects | Features colaborativas, notificações ao vivo |
 | Short links / redirects | Cloudflare Workers KV | Links de campanha, referral tracking |
+| Geração de imagens | Fal.ai (`@fal-ai/client`) | SaaS com geração de imagem/vídeo (Flux, SDXL) |
+| Agentes complexos com estado | Trigger.dev + AI SDK | Workflows de IA de longa duração com retry e checkpointing |
+| Escala de vetores (>10M) | Cloudflare Vectorize | Quando pgvector não for suficiente |
+| Modelos no edge sem custo por token | Cloudflare Workers AI | IA leve rodando no próprio Worker (classificação, embeddings baratos) |
 
 ---
 
@@ -382,6 +497,7 @@ TRIGGER_API_URL="https://api.trigger.dev"
 | Trigger.dev | 50K execuções/mês |
 | Cloudflare Rate Limiting | Incluído no plano free (1M requests/mês) |
 | Upstash (opcional) | 10K requests/dia — só se precisar de limite por usuário |
+| OpenRouter | Pay-per-use, sem free tier fixo — mas acesso a modelos gratuitos (Llama, Gemini Flash free) |
 
 ---
 
@@ -401,6 +517,10 @@ TRIGGER_API_URL="https://api.trigger.dev"
 - [ ] Ativar Zaraz no Cloudflare Dashboard → adicionar PostHog como ferramenta
 - [ ] Integrar Zaraz Web API no `packages/analytics`
 - [ ] Ativar Sentry: `sentry.server.config.ts`, `sentry.client.config.ts`
+- [ ] Habilitar extensão pgvector no Neon: `CREATE EXTENSION vector;`
+- [ ] Configurar `packages/ai`: Vercel AI SDK + OpenRouter provider
+- [ ] Criar tabelas `ai_settings` e `embeddings` no schema
+- [ ] Criar rota `/[orgSlug]/settings/ai` (formulário de chave OpenRouter)
 - [ ] Testar fluxo completo: signup → onboarding → billing → cancelamento
 - [ ] Deploy Cloudflare Pages: setar envs de produção + Stripe live keys
 
