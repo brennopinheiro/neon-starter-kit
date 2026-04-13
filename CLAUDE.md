@@ -72,7 +72,13 @@ O pacote `@cloudflare/next-on-pages` foi **descontinuado**. O substituto oficial
 Todas as rotas do dashboard seguem o padrão `/[orgSlug]/...`. A middleware do Next.js valida se o usuário tem acesso à org antes de renderizar qualquer página.
 
 ### Neon — nunca usar connection pooling direto em Workers
-Workers têm muitas instâncias concorrentes. Sempre usar o **Neon HTTP driver** (`@neondatabase/serverless`) com `{ fullResults: true }` ou via Drizzle com `neon()` driver.
+Workers têm muitas instâncias concorrentes. Sempre usar o **Neon HTTP driver** via Drizzle:
+```ts
+import { neon } from "@neondatabase/serverless"
+import { drizzle } from "drizzle-orm/neon-http"
+const db = drizzle(neon(process.env.DATABASE_URL!))
+```
+Nunca importar `pg`, `postgres` ou `drizzle-orm/node-postgres`.
 
 ### Stripe Webhooks no `apps/api` (Worker), não no `apps/app`
 Webhooks precisam de raw body para validação de assinatura. No Next.js no edge isso tem friction. Manter no Worker dedicado.
@@ -92,8 +98,11 @@ pnpm install
 pnpm dev
 
 # Dev por app específico
-pnpm --filter @workspace/app dev
-pnpm --filter @workspace/web dev
+pnpm --filter @workspace/app dev      # Next.js em localhost:3001
+pnpm --filter @workspace/web dev      # Astro em localhost:3000
+
+# Simular edge Cloudflare localmente (obrigatório antes de deploy)
+pnpm --filter @workspace/app preview  # roda opennextjs-cloudflare preview
 
 # Banco de dados
 pnpm db:generate    # gerar migrations
@@ -101,12 +110,12 @@ pnpm db:migrate     # aplicar migrations
 pnpm db:studio      # Drizzle Studio (GUI local)
 
 # Build para Cloudflare Pages
-pnpm --filter @workspace/app pages:build
-pnpm --filter @workspace/web build
+pnpm --filter @workspace/app pages:build   # output: apps/app/.open-next/assets
+pnpm --filter @workspace/web build         # output: apps/web/dist
 
 # Testes
-pnpm test           # Vitest
-pnpm test:e2e       # Playwright
+pnpm test           # Vitest (unitários)
+pnpm test:e2e       # Playwright (auth → onboarding → billing)
 ```
 
 ---
@@ -120,10 +129,12 @@ pnpm test:e2e       # Playwright
 - [ ] Configurar Stripe: Products + Prices + Webhook endpoint
 - [ ] Configurar domínio verificado no Resend
 - [ ] Ativar Zaraz no Cloudflare Dashboard → adicionar PostHog
-- [ ] Criar projetos no Cloudflare Pages: `app` + `web` (com build commands corretos)
-- [ ] Setar variáveis de ambiente no Cloudflare Pages
+- [ ] Criar projetos no Cloudflare Pages: `app` + `web` + `docs` (com build commands corretos)
+- [ ] Setar variáveis de ambiente no Cloudflare Pages (incluindo `NODE_VERSION=20`)
+- [ ] Criar rota `/[orgSlug]/settings/ai` (chave OpenRouter por org)
 - [ ] Testar fluxo completo: signup → onboarding → billing → cancelamento
 - [ ] Ativar Sentry (DSN + source maps)
+- [ ] Verificar bundle size: `pnpm --filter @workspace/app pages:build` — checar que `.open-next` < 10MB
 
 ---
 

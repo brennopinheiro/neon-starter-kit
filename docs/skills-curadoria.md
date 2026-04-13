@@ -245,6 +245,27 @@ OpenRouter é compatível diretamente com o Vercel AI SDK — sem adapter adicio
 
 ---
 
+## TESTES
+
+### Vitest + Playwright — Sem skills oficiais
+
+Não foram encontradas skills oficiais para Vitest ou Playwright no skills.sh. Para o boilerplate:
+
+- **Vitest**: bem documentado, zero configuração em projetos TypeScript modernos. Usar docs oficiais.
+- **Playwright**: skill community disponível:
+
+```bash
+npx skills add jeremylongshore/claude-code-plugins-plus-skills@playwright-e2e -g -y  # se disponível
+```
+
+**Fluxos E2E essenciais a cobrir no boilerplate:**
+1. Signup → verificação de email → onboarding (criar org) → dashboard
+2. Convite de membro → aceitar convite → acesso à org
+3. Upgrade de plano → Stripe Checkout → webhook → plano atualizado
+4. Cancelamento → webhook → downgrade
+
+---
+
 ## SKILLS JÁ ATIVAS NESTA SESSÃO
 
 Não precisam instalar — disponíveis via slash command:

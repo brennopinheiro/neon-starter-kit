@@ -231,6 +231,21 @@ NEXT_PUBLIC_APP_URL = "https://app.yourdomain.com"
 NODE_VERSION=20
 ```
 
+```toml
+# apps/api/wrangler.toml — Worker dedicado para Stripe webhooks
+name = "my-saas-api"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+main = "src/index.ts"
+
+[vars]
+APP_URL = "https://app.yourdomain.com"
+
+# Secrets (setar via: wrangler secret put STRIPE_WEBHOOK_SECRET)
+# STRIPE_WEBHOOK_SECRET
+# DATABASE_URL
+```
+
 ---
 
 ## Astro: Marketing Site
