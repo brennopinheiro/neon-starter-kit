@@ -28,6 +28,7 @@ Template de monorepo opinionado com stack Cloudflare-first, multi-tenant desde o
 | Analytics | PostHog + Cloudflare Zaraz | Analytics server-side no edge |
 | Observabilidade | Sentry | Error tracking com stack traces reais |
 | Rate Limiting | Cloudflare (infra) + Upstash Redis (lógica de negócio) | Duas camadas distintas |
+| IA | Vercel AI SDK + OpenRouter + pgvector | Agentes, RAG, streaming — sem lock-in de modelo |
 
 ---
 
@@ -38,24 +39,26 @@ Template de monorepo opinionado com stack Cloudflare-first, multi-tenant desde o
 ├── apps/
 │   ├── web/          # Astro 5 — marketing site + landing page (porta 3000)
 │   ├── app/          # Next.js 15 — dashboard autenticado, multi-tenant (porta 3001)
-│   ├── api/          # Cloudflare Workers — REST + Stripe webhooks (porta 3002)
+│   ├── api/          # Cloudflare Worker — Stripe webhooks APENAS (porta 3002)
 │   └── docs/         # Astro Starlight — documentação interna (porta 3004)
 │
 ├── packages/
-│   ├── auth/         # Better Auth config + plugins
-│   ├── database/     # Drizzle schema, migrations, client Neon
+│   ├── config/       # tsconfig base, ESLint, Tailwind preset — compartilhados
+│   ├── auth/         # Better Auth config + plugins (organization, admin)
+│   ├── database/     # Drizzle schema, migrations, client Neon (HTTP driver)
 │   ├── types/        # Tipos TypeScript compartilhados
 │   ├── ui/           # Shadcn/ui component library
 │   ├── payment/      # Stripe helpers, pricing config, webhook handlers
 │   ├── email/        # Resend + React Email templates
-│   ├── analytics/    # PostHog helpers + Zaraz Web API
+│   ├── analytics/    # PostHog helpers (server + client) + Zaraz Web API
 │   ├── observability/ # Sentry config (server, client, edge)
-│   └── jobs/         # Trigger.dev background jobs
+│   ├── jobs/         # Trigger.dev background jobs
+│   └── ai/           # Vercel AI SDK + OpenRouter provider + pgvector helpers
 │
 ├── turbo.json
 ├── pnpm-workspace.yaml
 ├── .env.example
-└── tsconfig.json
+└── tsconfig.json     # estende packages/config/tsconfig/base.json
 ```
 
 ---
@@ -134,6 +137,12 @@ pnpm test:e2e       # Playwright
 | Audit log | Tabela `events` no Drizzle |
 | Real-time / colaborativo | Cloudflare Durable Objects |
 | Short links / referral | Cloudflare Workers KV |
+| CI/CD | GitHub Actions + Turborepo remote cache |
+| Neon branch por PR | Neon CLI + GitHub Actions |
+| DB pooling em produção | Cloudflare Hyperdrive |
+| Outbound webhooks para usuários | Hookdeck Outpost (self-hosted) |
+| Geração de imagens | Fal.ai |
+| Agentes com estado longo | Trigger.dev + AI SDK |
 
 ---
 

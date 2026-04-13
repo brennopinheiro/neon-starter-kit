@@ -6,19 +6,21 @@
 
 ## Ponto de Partida
 
-**Base:** [Orion Kit](https://github.com/Mumma6/orion-kit) — monorepo TypeScript com Turborepo, Next.js 15, Neon, Drizzle, Stripe, Resend, PostHog e Trigger.dev.
+**Base:** `pnpm create turbo` — scaffold limpo, zero legado. Cada package adicionado manualmente com a stack exata planejada.
 
-**Substituições e adições necessárias:**
+**Por que não usar o Orion Kit como base:**
+O kit entregaria valor em ~20% da stack (Turborepo + Drizzle + Neon base). Mas auth, observabilidade e deploy seriam reescritos do zero de qualquer forma — gerando conflitos de merge e configs legadas. Mais simples e mais limpo começar com o monorepo vazio do Turborepo e construir cada package com as decisões certas desde o início.
 
-| Original (Orion Kit) | Ação | Motivo |
+**Stack construída do zero sobre `pnpm create turbo`:**
+
+| Decisão | Tecnologia | Motivo |
 |---|---|---|
-| JWT custom auth | Substituir → **Better Auth** | Plugin nativo de Organizations (multi-tenant), self-hosted, sem custo por usuário |
-| Axiom (observability) | Substituir → **Sentry** | Error tracking com stack traces, session replay e alertas mais completos |
-| Vercel (deploy) | Substituir → **Cloudflare Pages** | Edge global, Workers integrados, Zaraz nativo, sem cold starts, custo menor |
-| `@cloudflare/next-on-pages` | Substituir → **`@opennextjs/cloudflare`** | Pacote descontinuado — OpenNext é o substituto oficial com suporte completo ao App Router |
-| — | Adicionar → **Astro** (apps/web) | Marketing site e landing page estáticos com performance máxima no edge |
-| — | Adicionar → **Cloudflare Zaraz** | Tag manager server-side no edge: sem scripts pesados no cliente, privacidade melhorada |
-| — | Adicionar → **`packages/ai`** | Camada de IA: Vercel AI SDK + OpenRouter + pgvector — a maioria dos SaaS vai precisar |
+| Auth | **Better Auth** (organization + admin plugins) | Multi-tenant nativo, self-hosted, sem custo por usuário |
+| Observabilidade | **Sentry** | Error tracking com stack traces e session replay |
+| Deploy | **Cloudflare Pages** + `@opennextjs/cloudflare` | Edge global, Workers integrados, Zaraz nativo, sem cold starts |
+| Marketing site | **Astro 5** | SSG/SSR estático com performance máxima no edge |
+| Tag manager | **Cloudflare Zaraz** | Scripts de terceiros server-side, sem impacto no LCP |
+| IA | **Vercel AI SDK + OpenRouter + pgvector** | Camada de agentes pronta, sem serviço extra de vetores |
 
 ---
 
@@ -156,10 +158,11 @@ my-saas/
 ├── apps/
 │   ├── web/          # Marketing site + landing page (Astro 5 → Cloudflare Pages, porta 3000)
 │   ├── app/          # Dashboard autenticado, multi-tenant (Next.js 15 → Cloudflare Pages, porta 3001)
-│   ├── api/          # REST endpoints + Stripe webhooks (Cloudflare Workers, porta 3002)
+│   ├── api/          # Stripe webhooks APENAS (Cloudflare Worker, porta 3002)
 │   └── docs/         # Documentação interna (Astro Starlight → Cloudflare Pages, porta 3004)
 │
 ├── packages/
+│   ├── config/       # Configs compartilhadas: tsconfig base, ESLint, Tailwind preset
 │   ├── auth/         # Better Auth config + plugins (organization, admin)
 │   ├── database/     # Drizzle schema, migrations, client Neon + pgvector
 │   ├── types/        # Tipos TypeScript compartilhados
@@ -174,7 +177,7 @@ my-saas/
 ├── turbo.json
 ├── pnpm-workspace.yaml
 ├── .env.example
-└── tsconfig.json
+└── tsconfig.json     # estende packages/config/tsconfig/base.json
 ```
 
 ---
@@ -184,14 +187,19 @@ my-saas/
 Cada app é um projeto separado no Cloudflare Pages, apontando para a mesma monorepo com `build watch paths` diferentes.
 
 ```bash
-# apps/app (Next.js 15 no edge)
-Build command:   pnpm --filter @workspace/app pages:build
-Build output:    apps/app/.vercel/output/static
-Root directory:  /   # raiz da monorepo para o Turborepo funcionar
+# apps/app (Next.js 15 → @opennextjs/cloudflare)
+Build command:   pnpm install --frozen-lockfile && pnpm --filter @workspace/app pages:build
+Build output:    apps/app/.open-next/assets        # ← output correto do @opennextjs/cloudflare
+Root directory:  /                                  # raiz da monorepo para o Turborepo funcionar
 
 # apps/web (Astro — marketing site)
-Build command:   pnpm --filter @workspace/web build
+Build command:   pnpm install --frozen-lockfile && pnpm --filter @workspace/web build
 Build output:    apps/web/dist
+Root directory:  /
+
+# apps/docs (Astro Starlight)
+Build command:   pnpm install --frozen-lockfile && pnpm --filter @workspace/docs build
+Build output:    apps/docs/dist
 Root directory:  /
 ```
 
@@ -199,8 +207,10 @@ Root directory:  /
 // apps/app/package.json
 {
   "scripts": {
-    "pages:build": "npx @opennextjs/cloudflare",
-    "build": "next build"
+    "pages:build": "opennextjs-cloudflare build",
+    "preview":     "opennextjs-cloudflare preview",
+    "build":       "next build",
+    "dev":         "next dev --port 3001"
   }
 }
 ```
@@ -208,8 +218,17 @@ Root directory:  /
 ```toml
 # apps/app/wrangler.toml
 name = "my-saas-app"
+compatibility_date = "2024-09-23"
 compatibility_flags = ["nodejs_compat"]
-pages_build_output_dir = ".vercel/output/static"
+pages_build_output_dir = ".open-next/assets"
+
+[vars]
+NEXT_PUBLIC_APP_URL = "https://app.yourdomain.com"
+```
+
+**Variável de ambiente obrigatória no CF Pages dashboard:**
+```bash
+NODE_VERSION=20
 ```
 
 ---
@@ -288,7 +307,13 @@ export function zarazTrack(event: string, properties?: Record<string, unknown>) 
 import { betterAuth } from "better-auth"
 import { drizzleAdapter } from "better-auth/adapters/drizzle"
 import { organization, admin } from "better-auth/plugins"
-import { db } from "@workspace/database"
+import { neon } from "@neondatabase/serverless"          // ← HTTP driver, edge-safe
+import { drizzle } from "drizzle-orm/neon-http"          // ← neon-http adapter, nunca neon-serverless
+import * as schema from "./schema"
+
+// Cliente DB criado aqui com o driver correto para o edge
+const sql = neon(process.env.DATABASE_URL!)
+const db = drizzle(sql, { schema })
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, { provider: "pg" }),
@@ -305,7 +330,54 @@ export const auth = betterAuth({
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     },
   },
+  session: {
+    cookieCache: { enabled: true, maxAge: 5 * 60 }, // cache de 5 min no edge
+  },
 })
+
+export type Session = typeof auth.$Infer.Session
+export type User    = typeof auth.$Infer.Session.user
+```
+
+**Middleware multi-tenant — `apps/app/src/middleware.ts`**
+
+```typescript
+// Valida orgSlug e acesso antes de qualquer página renderizar
+import { NextRequest, NextResponse } from "next/server"
+import { getSessionFromRequest } from "@workspace/auth/edge"
+
+export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl
+
+  // Rotas públicas — sem verificação
+  if (pathname.startsWith("/sign-") || pathname.startsWith("/api/auth")) {
+    return NextResponse.next()
+  }
+
+  const session = await getSessionFromRequest(request)
+
+  // Redirecionar para login se não autenticado
+  if (!session) {
+    return NextResponse.redirect(new URL("/sign-in", request.url))
+  }
+
+  // Validar acesso ao orgSlug na URL
+  const orgSlug = pathname.split("/")[1]
+  if (orgSlug && orgSlug !== "admin") {
+    const hasAccess = session.user.organizations?.some(
+      (org) => org.slug === orgSlug
+    )
+    if (!hasAccess) {
+      return NextResponse.redirect(new URL("/", request.url))
+    }
+  }
+
+  return NextResponse.next()
+}
+
+export const config = {
+  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+}
 ```
 
 ---
@@ -396,9 +468,11 @@ export async function searchSimilar(orgId: string, query: string, limit = 5) {
 import { vector } from "drizzle-orm/pg-core"
 
 // Configurações de IA por organização
+// Criptografia: AES-256-GCM via packages/ai/src/crypto.ts usando AI_ENCRYPTION_KEY
+// Usar: encryptApiKey(key) ao salvar, decryptApiKey(key) ao ler
 export const aiSettings = pgTable("ai_settings", {
   orgId:            text("org_id").references(() => organizations.id, { onDelete: "cascade" }).primaryKey(),
-  openrouterApiKey: text("openrouter_api_key"),  // criptografado com AES-256
+  openrouterApiKey: text("openrouter_api_key"),  // valor: iv:authTag:ciphertext (base64)
   defaultModel:     text("default_model").default("anthropic/claude-3-5-sonnet"),
   updatedAt:        timestamp("updated_at").defaultNow(),
 })
@@ -465,9 +539,9 @@ TRIGGER_API_KEY="tr_..."
 TRIGGER_API_URL="https://api.trigger.dev"
 
 # IA — OpenRouter (gateway para 300+ modelos)
-OPENROUTER_API_KEY="sk-or-..."
-# Por org: chave salva no banco (ai_settings.openrouter_api_key), criptografada
-# AI_ENCRYPTION_KEY="..."  # para criptografar chaves de API no banco
+OPENROUTER_API_KEY="sk-or-..."       # chave padrão do sistema (fallback)
+AI_ENCRYPTION_KEY="..."              # 32 bytes hex — para AES-256-GCM das chaves por org
+# Gerar: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```
 
 ---
@@ -514,6 +588,10 @@ OPENROUTER_API_KEY="sk-or-..."
 | Agentes complexos com estado | Trigger.dev + AI SDK | Workflows de IA de longa duração com retry e checkpointing |
 | Escala de vetores (>10M) | Cloudflare Vectorize | Quando pgvector não for suficiente |
 | Modelos no edge sem custo por token | Cloudflare Workers AI | IA leve rodando no próprio Worker (classificação, embeddings baratos) |
+| CI/CD | GitHub Actions + Turborepo remote cache | `--affected` para rodar só o que mudou; cache de build compartilhado |
+| Neon branch por PR | Neon CLI + GitHub Actions | `neon branches create --parent main` no PR open, deletar no close |
+| DB pooling em produção | Cloudflare Hyperdrive | Reduz latência e gerencia connection pooling automaticamente no edge |
+| Outbound webhooks para usuários | Hookdeck Outpost (self-hosted) | Quando o produto precisar fornecer webhooks de saída para clientes |
 
 ---
 
@@ -557,14 +635,20 @@ Resumo dos 8 pontos críticos pesquisados (abril/2026):
 
 ## Checklist de Setup (novo projeto)
 
-- [ ] `git clone` do Orion Kit → renomear projeto
-- [ ] Substituir `packages/auth` por Better Auth (organization + admin plugins)
-- [ ] Substituir `packages/observability` (Axiom → Sentry)
-- [ ] Adicionar `apps/web` com Astro 5 + adapter Cloudflare
-- [ ] Migrar deploy de Vercel → Cloudflare Pages (2 projetos: `app` + `web`)
-- [ ] Configurar `wrangler.toml` em cada app
+- [ ] `pnpm create turbo@latest my-saas` → selecionar "Empty workspace"
+- [ ] Configurar `pnpm-workspace.yaml` e `turbo.json` base
+- [ ] Criar `packages/config` (tsconfig base, ESLint, Tailwind preset)
+- [ ] Criar `apps/app` (Next.js 15 + `@opennextjs/cloudflare`)
+- [ ] Criar `apps/web` (Astro 5 + adapter Cloudflare)
+- [ ] Criar `apps/api` (Cloudflare Worker — Stripe webhooks)
+- [ ] Criar `packages/database` (Drizzle + Neon HTTP driver)
+- [ ] Criar `packages/auth` (Better Auth + organization + admin)
+- [ ] Criar `packages/ui` (shadcn/ui init)
+- [ ] Criar `packages/payment`, `packages/email`, `packages/analytics`, `packages/observability`, `packages/jobs`, `packages/ai`
+- [ ] Adicionar `apps/app/src/middleware.ts` (validação multi-tenant)
+- [ ] Configurar `wrangler.toml` em `apps/app` e `apps/api`
 - [ ] Configurar Rate Limiting no Cloudflare Dashboard (sign-in, signup, webhooks)
-- [ ] Configurar todas as variáveis de ambiente
+- [ ] Configurar `.env.example` com todas as variáveis
 - [ ] `pnpm db:generate && pnpm db:migrate`
 - [ ] Configurar Stripe: Products, Prices, Webhook endpoint
 - [ ] Configurar domínio no Resend + template de boas-vindas
