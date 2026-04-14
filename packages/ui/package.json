@@ -3,7 +3,9 @@
   "version": "0.0.0",
   "private": true,
   "exports": {
-    "./*": "./src/components/*.tsx"
+    ".": "./src/index.ts",
+    "./utils": "./src/lib/utils.ts",
+    "./components/*": "./src/components/*.tsx"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1",

@@ -1,0 +1,5 @@
+{
+  "extends": "@workspace/config/tsconfig/astro.json",
+  "include": ["src", "astro.config.ts"],
+  "exclude": ["node_modules", "dist"]
+}

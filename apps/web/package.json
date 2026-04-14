@@ -1,0 +1,22 @@
+{
+  "name": "@workspace/web",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev --port 3000",
+    "build": "astro build",
+    "preview": "astro preview",
+    "typecheck": "astro check"
+  },
+  "dependencies": {
+    "@astrojs/cloudflare": "^12",
+    "@astrojs/sitemap": "^3",
+    "@astrojs/tailwind": "^5",
+    "astro": "^5",
+    "tailwindcss": "^4"
+  },
+  "devDependencies": {
+    "@workspace/config": "workspace:*",
+    "typescript": "^5"
+  }
+}

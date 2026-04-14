@@ -1,7 +1,5 @@
-import { Resend } from "resend"
-
-export function createEmailClient(apiKey: string) {
-  return new Resend(apiKey)
-}
-
-export type { Resend }
+export { createEmailClient } from "./client"
+export { sendEmail } from "./send"
+export { WelcomeEmail } from "./templates/welcome"
+export { InviteEmail } from "./templates/invite"
+export { SubscriptionConfirmationEmail } from "./templates/subscription-confirmation"

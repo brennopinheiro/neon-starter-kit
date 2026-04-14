@@ -1,0 +1,46 @@
+---
+import Layout from "@/layouts/Layout.astro"
+
+const APP_URL = import.meta.env.PUBLIC_APP_URL ?? "http://localhost:3001"
+---
+
+<Layout title="Neon Starter Kit" description="Boilerplate SaaS Cloudflare-first">
+  <main class="min-h-screen flex flex-col items-center justify-center px-4">
+    <div class="max-w-2xl text-center space-y-6">
+      <h1 class="text-5xl font-bold tracking-tight">
+        Neon Starter Kit
+      </h1>
+      <p class="text-xl text-gray-500">
+        Boilerplate SaaS multi-tenant. Do <code class="bg-gray-100 px-1 rounded">git clone</code> ao primeiro deploy em menos de 1 dia.
+      </p>
+      <div class="flex gap-4 justify-center">
+        <a
+          href={APP_URL}
+          class="px-6 py-3 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition-colors"
+        >
+          Abrir App
+        </a>
+        <a
+          href="/docs"
+          class="px-6 py-3 border border-gray-300 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+        >
+          Documentação
+        </a>
+      </div>
+      <div class="grid grid-cols-3 gap-4 pt-8 text-sm text-gray-500">
+        <div class="p-4 border rounded-lg text-left">
+          <div class="font-semibold text-gray-900 mb-1">Edge-first</div>
+          Cloudflare Pages + Workers. Zero cold starts.
+        </div>
+        <div class="p-4 border rounded-lg text-left">
+          <div class="font-semibold text-gray-900 mb-1">Multi-tenant</div>
+          Organizations desde o dia 1. Sem refatoração depois.
+        </div>
+        <div class="p-4 border rounded-lg text-left">
+          <div class="font-semibold text-gray-900 mb-1">Free tier</div>
+          Todos os serviços têm free tier generoso para o MVP.
+        </div>
+      </div>
+    </div>
+  </main>
+</Layout>
