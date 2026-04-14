@@ -4,8 +4,7 @@
   "private": true,
   "exports": {
     ".": "./src/index.ts",
-    "./config": "./src/config.ts",
-    "./webhooks": "./src/webhooks.ts"
+    "./config": "./src/config.ts"
   },
   "dependencies": {
     "stripe": "^17"

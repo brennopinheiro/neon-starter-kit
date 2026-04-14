@@ -40,7 +40,7 @@ export async function saveAiApiKey(formData: FormData) {
       },
     })
 
-  revalidatePath(`/[orgSlug]/settings/ai`, "page")
+  revalidatePath("/[orgSlug]/settings/ai", "page")
 }
 
 export async function removeAiApiKey(orgId: string) {
@@ -52,5 +52,5 @@ export async function removeAiApiKey(orgId: string) {
     .set({ aiApiKeyEncrypted: null, aiApiKeyIv: null, updatedAt: new Date() })
     .where(eq(organizationSettings.organizationId, orgId))
 
-  revalidatePath(`/[orgSlug]/settings/ai`, "page")
+  revalidatePath("/[orgSlug]/settings/ai", "page")
 }
